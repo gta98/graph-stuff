@@ -3,6 +3,7 @@ from graph import *
 
 
 def main():
+    G = DirectedGraph()
     pass
 
 
