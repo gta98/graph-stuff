@@ -15,7 +15,13 @@ class BaseKey:
 		raise ValueError("Cannot set property: BaseKey.value")
 	@property
 	def __eq__(self, other):
-		return issubclass(BaseKey, other) and (self.value == other.value)
+		return issubclass(type(other), BaseKey) and (self._value == other._value)
+	@property
+	def __key(self):
+		return self
+	@property
+	def key(self):
+		return self
 
 class GraphObject:
     def __init__(self):
@@ -27,3 +33,25 @@ class GraphObject:
     @property
     def key(self):
         raise NotImplementedError()
+
+class NodeKey(BaseKey):
+	@property
+	def __eq__(self, other):
+		return issubclass(type(other), NodeKey) and (self._value == other._value)
+	def __hash__(self):
+		return hash(self._value)
+class EdgeKey(BaseKey):
+	def __init__(self, value:Tuple[NodeKey,NodeKey]):
+		try:
+			assert(len(value)==2)
+			assert(value[0] == NodeKey)
+			assert(value[1] == NodeKey)
+			self._value = (value[0], value[1])
+		except:
+			raise ValueError("Can only init EdgeKey with two NodeKey's")
+	@property
+	def __eq__(self, other):
+		return issubclass(type(other), EdgeKey) and (self._value == other._value)
+	def __hash__(self):
+		return hash(hash(self._value[0]), hash(self._value[1]))
+class Graph: pass
