@@ -1,5 +1,6 @@
 
 from typing import List, Tuple, FrozenSet, Union, Dict
+from itertools import chain
 from collections.abc import Iterable
 
 class BaseKey:
@@ -34,10 +35,24 @@ class GraphObject:
     def key(self):
         raise NotImplementedError()
 
+class GraphObjectMapper:
+	def __init__(self, graph, d: Dict):
+		self._d = d
+		self._graph = graph
+		self._d = dict()
+		for key in d.keys():
+			new_key = graph[key]
+			assert(new_key)
+			self._d[new_key] = d[key]
+	def __getitem__(self, key):
+		return self._d.get(self._graph[key], None)
+	def __setitem__(self, key, value):
+		self._d[self._graph[key]] = value
+
 class NodeKey(BaseKey):
 	@property
 	def __eq__(self, other):
-		return issubclass(type(other), NodeKey) and (self._value == other._value)
+		return (type(other) == NodeKey) and (self._value == other._value)
 	def __hash__(self):
 		return hash(self._value)
 class EdgeKey(BaseKey):
@@ -51,7 +66,7 @@ class EdgeKey(BaseKey):
 			raise ValueError("Can only init EdgeKey with two NodeKey's")
 	@property
 	def __eq__(self, other):
-		return issubclass(type(other), EdgeKey) and (self._value == other._value)
+		return (type(other) == EdgeKey) and (self._value == other._value)
 	def __hash__(self):
 		return hash(hash(self._value[0]), hash(self._value[1]))
 class Graph: pass

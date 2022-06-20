@@ -5,12 +5,9 @@ from node import Node
 
 class Edge(GraphObject):
 
-    def __init__(self, obj_1: Union[Node, NodeKey], obj_2: Union[Node, NodeKey]):
-        if type(obj_1) == Node: obj_1 = obj_1.key
-        if type(obj_2) == Node: obj_2 = obj_2.key
-        assert((type(obj_1) == NodeKey) and (type(obj_2) == NodeKey))
-        self._key_1 = obj_1
-        self._key_2 = obj_2
+    def __init__(self, obj_1: Node, obj_2: Node):
+        self._node_1 = obj_1
+        self._node_2 = obj_2
         self._graph = None
 
     """
@@ -49,53 +46,75 @@ class Edge(GraphObject):
 
     @property
     def key(self):
-        return EdgeKey((self.key_1, self.key_2))
+        return (self.node_1, self.node_2)
     
     def attach(self, graph):
         assert(self._graph is None)
-        assert(self.key_1 in graph.V.keys())
-        assert(self.key_2 in graph.V.keys())
-        if self.graph:
-            self.detach()
-        nodes = [graph.V[self.key_1], graph.V[self.key_2]]
-        for node in nodes:
-            if self not in node.edges:
-                node.edges += self
+        node_1, node_2 = graph[self.node_1], graph[self.node_2]
+        if node_1 and node_2:
+            if self._node_1._graph is None: del self._node_1
+            if self._node_2._graph is None: del self._node_2
+            self._node_1, self._node_2 = node_1, node_2
+        else:
+            raise Exception("Cannot attach edge with a nonexisting node")
+        for node in [self._node_1, self._node_2]:
+            assert(self not in node.edges)
+            node.edges.add(self)
         self._graph = graph
-        self._graph.E[self.key] = self
 
     def detach(self):
-        assert(self._graph)
-        if self.graph:
-            for node in self._nodes:
-                if self in node.edges:
-                    node.edges.remove(self)
-            self.graph.E.pop(self.key)
-            self.graph = None
+        assert(self._graph is not None)
+        for node in self._nodes:
+            if self in node.edges:
+                node.edges.remove(self)
+        self.graph.E.remove(self)
+        self.graph = None
+        del self
 
-    def __contains__(self, obj: Union[Node, NodeKey]):
-        if type(obj) == Node: obj = obj.key
+    def __contains__(self, obj: Node):
         return obj in self.nodes
 
+    def __eq__(self, other):
+        return (self._node_1 == other._node_1) and (self._node_2 == other._node_2) \
+            and (self.capacity == other.capacity) \
+            and (self.weight == other.weight)
+    
+    def __hash__(self):
+        return hash((*self.nodes, self.capacity, self.weight))
+    
+    def __str__(self):
+        return f"({str(self._node_1)}, {str(self._node_2)})"
+
+    @property
+    def node_1(self):
+        return self._node_1
+
+    @property
+    def node_2(self):
+        return self._node_2
+
+    @property
+    def nodes(self):
+        return [self.node_1, self.node_2]
+    
     @property
     def capacity(self):
         if not self._graph:
             return None
-        return self._graph.C[self.key]
+        return self._graph.C[self]
     
-    @property
+    @capacity.setter
     def capacity(self, value):
         assert(self._graph)
-        self._graph.C[self.key] = value
+        self._graph.C[self] = value
 
     @property
-    def key_1(self):
-        return self._key_1
-
-    @property
-    def key_2(self):
-        return self._key_2
-
-    @property
-    def nodes(self):
-        return [self.key_1, self.key_2]
+    def weight(self):
+        if not self._graph:
+            return None
+        return self._graph.W[self]
+    
+    @weight.setter
+    def weight(self, value):
+        assert(self._graph)
+        self._graph.W[self] = value
