@@ -6,15 +6,21 @@ from edge import *
 
 class DirectedGraph:
 
-	def __init__(self, V:Union[Iterable,None] = None, E:Union[Iterable,None] = None):
+	def __init__(self, V:Iterable = None, E:Iterable = None, C:Dict = None):
 		if (not V) and (not E):
 			self.V = {}
 			self.E = {}
-		elif (type(V) in [List, Set]) and (type(E) in [List, Set]):
-			self.V = V
-			self.E = E
-		else:
-			raise Exception("Not supported")
+		if V:
+			for node in V:
+				if type(node) not in (Node, NodeKey):
+					node = NodeKey(node)
+				self += node
+		if E:
+			for edge in E:
+				self += edge
+		if C:
+			self.C = C
+
 
 	def __add__(self, other):
 		if issubclass(GraphObject, other):
@@ -61,3 +67,8 @@ class DirectedGraph:
 				return try_edge
 			else:
 				raise ValueError("Unrecognized key")
+	
+	@property
+	def C(self, update: Dict):
+		for edge, capacity in update:
+			self[edge].capacity = capacity

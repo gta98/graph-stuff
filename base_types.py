@@ -1,5 +1,5 @@
 
-from typing import List, Tuple, FrozenSet, Union
+from typing import List, Tuple, FrozenSet, Union, Dict
 from collections.abc import Iterable
 
 class BaseKey:
