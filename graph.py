@@ -1,4 +1,6 @@
 
+from typing import List, Tuple
+
 class Edge: pass
 class Node: pass
 
@@ -60,7 +62,7 @@ class Node:
 		edge = Edge(self, node, 0)
 
 class DirectedGraph:
-	def __init__(self, V: List[Node], E: List[Edge]):
+	def __init__(self, V, E):
 		if (type(V) == List[Node]) and (type(E) == List[Edge]):
 			self.V = V
 			self.E = E
