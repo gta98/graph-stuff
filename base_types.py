@@ -1,5 +1,6 @@
 
 from typing import List, Tuple, FrozenSet, Union
+from collections.abc import Iterable
 
 class BaseKey:
 	_count = 0

@@ -1,5 +1,4 @@
 
-from curses import A_ALTCHARSET
 from base_types import *
 from node import *
 from edge import *
@@ -7,11 +6,11 @@ from edge import *
 
 class DirectedGraph:
 
-	def __init__(self, V=None, E=None):
+	def __init__(self, V:Union[Iterable,None] = None, E:Union[Iterable,None] = None):
 		if (not V) and (not E):
 			self.V = {}
 			self.E = {}
-		elif (type(V) == List[Node]) and (type(E) == List[Edge]):
+		elif (type(V) in [List, Set]) and (type(E) in [List, Set]):
 			self.V = V
 			self.E = E
 		else:
