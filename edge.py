@@ -70,6 +70,12 @@ class Edge(GraphObject):
         self.graph.E.remove(self)
         self.graph = None
         del self
+    
+    def invert(self):
+        tmp = self._node_1
+        self._node_1 = self._node_2
+        self._node_2 = tmp
+        return self
 
     def __contains__(self, obj: Node):
         return obj in self.nodes
@@ -84,6 +90,9 @@ class Edge(GraphObject):
     
     def __str__(self):
         return f"({str(self._node_1)}, {str(self._node_2)})"
+    
+    def copy(self):
+        return Edge(self._node_1.copy(), self._node_2.copy())
 
     @property
     def node_1(self):
@@ -118,3 +127,14 @@ class Edge(GraphObject):
     def weight(self, value):
         assert(self._graph)
         self._graph.W[self] = value
+    
+    @property
+    def flow(self):
+        if not self._graph:
+            return None
+        return self._graph.F[self]
+    
+    @flow.setter
+    def flow(self, value):
+        assert(self._graph)
+        self._graph.F[self] = value

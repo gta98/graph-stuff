@@ -6,7 +6,7 @@ from edge import *
 
 class Graph:
 	_V, _E, _C, _W = None, None, None, None
-	def __init__(self, V:Iterable = None, E:Iterable = None, C:Dict = {}, W:Dict = {}):
+	def __init__(self, V:Iterable = None, E:Iterable = None, C:Dict = {}, F:Dict = {}, W:Dict = {}):
 		if type(self) == Graph:
 			raise Exception("Cannot initialize Graph directly")
 		self.undirected = True if (type(self) == UndirectedGraph) else False
@@ -23,6 +23,7 @@ class Graph:
 			self += edge
 		self._C = C or dict()
 		self._W = W or dict()
+		self._F = F or dict()
 
 
 	def __add__(self, other):
@@ -65,6 +66,21 @@ class Graph:
 		else:
 			return self[Node(key=other)]
 	
+	def copy(self):
+		if type(self) == DirectedGraph: G = DirectedGraph([], [], {}, {})
+		elif type(self) == UndirectedGraph: G = UndirectedGraph([], [], {}, {})
+		else: raise Exception("Unrecognized type " + str(type(self)))
+		for node in self._V:
+			G += node.copy()
+		for edge in self._E:
+			G += edge.copy()
+		for edge, value in self._C._d.items():
+			G.C[edge] = value
+		for edge, value in self._W._d.items():
+			G.W[edge] = value
+		for edge, value in self._F._d.items():
+			G.F[edge] = value
+
 	def __contains__(self, other):
 		try: return self[other] is not None
 		except: pass
@@ -86,7 +102,6 @@ class Graph:
 			node.edges.clear()
 		for edge in edges:
 			self += edge
-		
 	
 	@property
 	def C(self):
@@ -103,6 +118,14 @@ class Graph:
 	@W.setter
 	def W(self, update: Dict):
 		self._W = GraphObjectMapper(self, update)
+	
+	@property
+	def F(self):
+		return self._F
+
+	@W.setter
+	def F(self, update: Dict):
+		self._F = GraphObjectMapper(self, update)
 
 
 class DirectedGraph(Graph): pass

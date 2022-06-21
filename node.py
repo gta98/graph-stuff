@@ -37,6 +37,9 @@ class Node(GraphObject):
     def __str__(self):
         return str(self._key)
     
+    def copy(self):
+        return Node(self._key, self._edges)
+    
     @property
     def edges(self):
         return self._edges
