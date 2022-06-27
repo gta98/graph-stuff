@@ -28,7 +28,7 @@ class Graph:
 
 	def __add__(self, other):
 		if issubclass(type(other), GraphObject):
-			other.attach(self)
+			other.graph = self
 		elif (type(other) in [List, Tuple, list, tuple]) and (len(other) in [2]):
 			node_1 = other[0] if (type(other[0]) == Node) else Node(key=other[0])
 			node_2 = other[1] if (type(other[1]) == Node) else Node(key=other[1])
@@ -67,19 +67,23 @@ class Graph:
 			return self[Node(key=other)]
 	
 	def copy(self):
+		G = None
 		if type(self) == DirectedGraph: G = DirectedGraph([], [], {}, {})
 		elif type(self) == UndirectedGraph: G = UndirectedGraph([], [], {}, {})
 		else: raise Exception("Unrecognized type " + str(type(self)))
 		for node in self._V:
-			G += node.copy()
+			node_copy = Node(node.key, edges=[])
+			node_copy.graph = G
 		for edge in self._E:
-			G += edge.copy()
+			edge_copy = Edge(edge.node_1, edge.node_2)
+			edge_copy.graph = G
 		for edge, value in self._C._d.items():
 			G.C[edge] = value
 		for edge, value in self._W._d.items():
 			G.W[edge] = value
 		for edge, value in self._F._d.items():
 			G.F[edge] = value
+		return G
 
 	def __contains__(self, other):
 		try: return self[other] is not None
@@ -109,7 +113,7 @@ class Graph:
 
 	@C.setter
 	def C(self, update: Dict):
-		self._C = GraphObjectMapper(self, update)
+		self._C = EdgeMapper(self, update)
 	
 	@property
 	def W(self):
@@ -117,7 +121,7 @@ class Graph:
 
 	@W.setter
 	def W(self, update: Dict):
-		self._W = GraphObjectMapper(self, update)
+		self._W = EdgeMapper(self, update)
 	
 	@property
 	def F(self):
@@ -125,11 +129,8 @@ class Graph:
 
 	@W.setter
 	def F(self, update: Dict):
-		self._F = GraphObjectMapper(self, update)
+		self._F = EdgeMapper(self, update)
 
 
 class DirectedGraph(Graph): pass
-
-class UndirectedGraph(Graph):
-	def __init__(self, V:Iterable = None, E:Iterable = None, C:Dict = None):
-		Graph.__init__(self, V, E, C)
+class UndirectedGraph(Graph): pass

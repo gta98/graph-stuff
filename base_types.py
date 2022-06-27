@@ -2,6 +2,18 @@
 from typing import List, Tuple, FrozenSet, Union, Dict
 from itertools import chain
 from collections.abc import Iterable
+from enum import Enum
+
+infinity = float('inf')
+
+class Color(Enum):
+	WHITE = 0
+	GRAY = 1
+	BLACK = 2
+
+WHITE = Color.WHITE
+GRAY = Color.GRAY
+BLACK = Color.BLACK
 
 class BaseKey:
 	_count = 0
@@ -27,13 +39,16 @@ class BaseKey:
 class GraphObject:
     def __init__(self):
         raise NotImplementedError()
-    def attach(self, graph):
-        raise NotImplementedError()
-    def detach(self):
-        raise NotImplementedError()
     @property
     def key(self):
         raise NotImplementedError()
+    @property
+    def graph(self):
+        raise NotImplementedError()
+    @graph.setter
+    def graph(self, value):
+        raise NotImplementedError()
+
 
 class GraphObjectMapper:
 	def __init__(self, graph, d: Dict):
@@ -48,6 +63,12 @@ class GraphObjectMapper:
 		return self._d.get(self._graph[key], None)
 	def __setitem__(self, key, value):
 		self._d[self._graph[key]] = value
+	def __call__(self, key):
+		return self[key]
+
+class EdgeMapper(GraphObjectMapper):
+	def __call__(self, node_1, node_2):
+		return self[(node_1,node_2)]
 
 class NodeKey(BaseKey):
 	@property
