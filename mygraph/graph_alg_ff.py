@@ -1,7 +1,7 @@
 
 from base_types import *
-from graph import DirectedGraph, Node, Edge
-from g_queue import Queue
+from .graph import DirectedGraph, Node, Edge
+from .g_queue import Queue
 
 def BFS(G:Graph, s:Node) -> None:
     for v in G.V:

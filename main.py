@@ -1,9 +1,9 @@
 
-from graph import *
+import mygraph
 
 
 def main():
-    G = DirectedGraph(
+    G = mygraph.DirectedGraph(
         V = {i for i in range(10)},
         E = {(1,5), (2,8), (4,9), (5,1), (7,3), (7,2)},
         C = {

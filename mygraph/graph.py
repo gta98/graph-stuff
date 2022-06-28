@@ -1,7 +1,7 @@
 
-from base_types import *
-from node import *
-from edge import *
+from .base_types import *
+from .node import *
+from .edge import *
 
 
 class Graph:

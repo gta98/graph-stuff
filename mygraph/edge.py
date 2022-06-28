@@ -1,7 +1,7 @@
 
 
-from base_types import *
-from node import Node
+from .base_types import *
+from .node import Node
 
 class Edge(GraphObject):
 
@@ -14,51 +14,34 @@ class Edge(GraphObject):
     def key(self):
         return (self.node_1, self.node_2)
     
-    @property
-    def graph(self):
-        try:
-            return self._graph
-        except:
-            return None
-    
-    @graph.setter
-    def graph(self, graph):
-        if graph is not None:
-            assert(self._graph is None)
-            node_1, node_2 = graph[self.node_1], graph[self.node_2]
-            if node_1 and node_2:
-                if self._node_1._graph is None: del self._node_1
-                if self._node_2._graph is None: del self._node_2
-                self._node_1, self._node_2 = node_1, node_2
-            else:
-                raise Exception("Cannot attach edge with a nonexisting node")
-            for node in [self._node_1, self._node_2]:
-                assert(self not in node.edges)
-                node.edges.add(self)
-            self._graph = graph
+    def attach(self, graph):
+        assert(self._graph is None)
+        node_1, node_2 = graph[self.node_1], graph[self.node_2]
+        if node_1 and node_2:
+            if self._node_1._graph is None: del self._node_1
+            if self._node_2._graph is None: del self._node_2
+            self._node_1, self._node_2 = node_1, node_2
         else:
-            assert(self._graph is not None)
-            for node in self._nodes:
-                if self in node.edges:
-                    node.edges.remove(self)
-            self.graph.E.remove(self)
-            self.graph = None
-            del self
+            raise Exception("Cannot attach edge with a nonexisting node")
+        for node in [self._node_1, self._node_2]:
+            assert(self not in node.edges)
+            node.edges.add(self)
+        self._graph = graph
+
+    def detach(self):
+        assert(self._graph is not None)
+        for node in self._nodes:
+            if self in node.edges:
+                node.edges.remove(self)
+        self.graph.E.remove(self)
+        self.graph = None
+        del self
     
-    @property
-    def copy(self) -> GraphObject:
-        return Edge(self.node_1, self.node_2)
-
-    @property
-    def inverse(self):
-        edge = self.copy
-        edge.invert()
-        return edge
-
-    def invert(self) -> None:
+    def invert(self):
         tmp = self._node_1
         self._node_1 = self._node_2
         self._node_2 = tmp
+        return self
 
     def __contains__(self, obj: Node):
         return obj in self.nodes
@@ -74,9 +57,8 @@ class Edge(GraphObject):
     def __str__(self):
         return f"({str(self._node_1)}, {str(self._node_2)})"
     
-    def __iter__(self):
-        yield self.node_1
-        yield self.node_2
+    def copy(self):
+        return Edge(self._node_1.copy(), self._node_2.copy())
 
     @property
     def node_1(self):

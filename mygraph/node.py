@@ -1,7 +1,7 @@
 
 
 from typing import List, Tuple, FrozenSet, Union
-from base_types import *
+from .base_types import *
 
 class Node:
     def __init__(self, key, edges=[]):
