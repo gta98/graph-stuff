@@ -16,27 +16,37 @@ class Graph:
 		assert(type(W) in [type(None), dict])
 		V = V or set()
 		E = E or set()
-		self._V = set()
+		self._V = dict()
+		self._E = dict()
 		for node in V:
 			self += node
 		for edge in E:
 			self += edge
-		self._C = C or dict()
-		self._W = W or dict()
-		self._F = F or dict()
+	
+	def add_vertex(self, vertex:GraphVertex):
+		assert(vertex not in self._V)
+		assert(vertex not in self._E)
+		self._V.add(vertex)
+		self._E[vertex] = dict()
 
+	def add_edge(self, edge:GraphEdge):
+		assert(edge.source in self and edge.target in self)
+		self._E[edge.source][edge.target] = edge
+		self._E[edge.target][edge.source] = edge
 
 	def __add__(self, other):
-		if issubclass(type(other), GraphObject):
-			other.graph = self
+		if issubclass(type(other), GraphVertex):
+			self.add_vertex(other)
+		elif issubclass(type(other), GraphEdge):
+			self.add_edge(other)
 		elif (type(other) in [List, Tuple, list, tuple]) and (len(other) in [2]):
-			node_1 = other[0] if (type(other[0]) == Node) else Node(key=other[0])
-			node_2 = other[1] if (type(other[1]) == Node) else Node(key=other[1])
-			edge = Edge(node_1, node_2)
+			node_1 = other[0] if (type(other[0]) == GraphVertex) else GraphVertex(key=other[0])
+			node_2 = other[1] if (type(other[1]) == GraphVertex) else GraphVertex(key=other[1])
+			edge = GraphEdge(node_1, node_2)
 			self += edge
 		else:
 			#raise ValueError("Unrecognized type")
-			self += Node(key=other)
+			self += GraphVertex(key=other)
 		return self
 	
 	def __sub__(self, other):
@@ -48,23 +58,23 @@ class Graph:
 		return self
 			
 	def __getitem__(self, other):
-		if type(other) == Node:
+		if type(other) == GraphVertex:
 			for node in self.V:
 				if node._key == other._key:
 					return node
 			return None
-		elif type(other) == Edge:
+		elif type(other) == GraphEdge:
 			node_1 = self[other.node_1]
 			node_2 = self[other.node_2]
 			if (not node_1) or (not node_2): return None
 			for edge in self.E:
 				if (edge.node_1 == node_1) and (edge.node_2 == node_2):
 					return edge
-			return Edge(node_1, node_2)
+			return GraphEdge(node_1, node_2)
 		elif (type(other) in [list, tuple]) and (len(other) == 2):
-			return self[Edge(other[0], other[1])]
+			return self[GraphEdge(other[0], other[1])]
 		else:
-			return self[Node(key=other)]
+			return self[GraphVertex(key=other)]
 	
 	def copy(self):
 		G = None
@@ -72,10 +82,10 @@ class Graph:
 		elif type(self) == UndirectedGraph: G = UndirectedGraph([], [], {}, {})
 		else: raise Exception("Unrecognized type " + str(type(self)))
 		for node in self._V:
-			node_copy = Node(node.key, edges=[])
+			node_copy = GraphVertex(node.key, edges=[])
 			node_copy.graph = G
 		for edge in self._E:
-			edge_copy = Edge(edge.node_1, edge.node_2)
+			edge_copy = GraphEdge(edge.node_1, edge.node_2)
 			edge_copy.graph = G
 		for edge, value in self._C._d.items():
 			G.C[edge] = value

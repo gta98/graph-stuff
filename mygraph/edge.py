@@ -1,106 +1,77 @@
 
 
 from .base_types import *
-from .node import Node
+from .node import GraphVertex
 
-class Edge(GraphObject):
+class GraphEdge(GraphObject):
 
-    def __init__(self, obj_1: Node, obj_2: Node):
-        self._node_1 = obj_1
-        self._node_2 = obj_2
-        self._graph = None
+    __counter = 0
 
-    @property
-    def key(self):
-        return (self.node_1, self.node_2)
+    def __init__(self, source:GraphVertex, target:GraphVertex, **extras):
+        super().__init__(extras=extras)
+        assert(source is not None and target is not None)
+        assert(type(source)==GraphVertex and type(target)==GraphVertex)
+        self._source = source
+        self._target = target
+
+    def _validate_extras(self):
+        pass
     
-    def attach(self, graph):
-        assert(self._graph is None)
-        node_1, node_2 = graph[self.node_1], graph[self.node_2]
-        if node_1 and node_2:
-            if self._node_1._graph is None: del self._node_1
-            if self._node_2._graph is None: del self._node_2
-            self._node_1, self._node_2 = node_1, node_2
-        else:
-            raise Exception("Cannot attach edge with a nonexisting node")
-        for node in [self._node_1, self._node_2]:
-            assert(self not in node.edges)
-            node.edges.add(self)
-        self._graph = graph
-
-    def detach(self):
-        assert(self._graph is not None)
-        for node in self._nodes:
-            if self in node.edges:
-                node.edges.remove(self)
-        self.graph.E.remove(self)
-        self.graph = None
-        del self
-    
-    def invert(self):
-        tmp = self._node_1
-        self._node_1 = self._node_2
-        self._node_2 = tmp
-        return self
-
-    def __contains__(self, obj: Node):
-        return obj in self.nodes
-
     def __eq__(self, other):
-        return (self._node_1 == other._node_1) and (self._node_2 == other._node_2) \
-            and (self.capacity == other.capacity) \
-            and (self.weight == other.weight)
-    
+        return (type(self)==type(other)) \
+                and (self._source == other._source) \
+                and (self._target == other._target)
+
     def __hash__(self):
-        return hash((*self.nodes, self.capacity, self.weight))
-    
+        return hash(hash(self._source),hash(self._target))
+
     def __str__(self):
-        return f"({str(self._node_1)}, {str(self._node_2)})"
+        return f"({str(self._source)},{str(self._target)})"
     
     def copy(self):
-        return Edge(self._node_1.copy(), self._node_2.copy())
+        return GraphEdge(self._source.copy(), self._target.copy(), self.extras)
+
+    def __contains__(self, obj: GraphVertex):
+        return obj in self.vertices
+
+    def invert(self):
+        tmp = self._source
+        self._source = self._target
+        self._target = tmp
+        return self
 
     @property
-    def node_1(self):
-        return self._node_1
+    def source(self):
+        return self._source
 
     @property
-    def node_2(self):
-        return self._node_2
+    def target(self):
+        return self._target
 
     @property
-    def nodes(self):
-        return [self.node_1, self.node_2]
+    def vertices(self):
+        return (self.source, self.target)
     
     @property
     def capacity(self):
-        if not self._graph:
-            return None
-        return self._graph.C[self]
-    
-    @capacity.setter
-    def capacity(self, value):
-        assert(self._graph)
-        self._graph.C[self] = value
+        return self['capacity']
 
     @property
     def weight(self):
-        if not self._graph:
-            return None
-        return self._graph.W[self]
-    
-    @weight.setter
-    def weight(self, value):
-        assert(self._graph)
-        self._graph.W[self] = value
-    
+        return self['weight']
+
     @property
     def flow(self):
-        if not self._graph:
-            return None
-        return self._graph.F[self]
-    
+        return self['flow']
+
+    @capacity.setter
+    def capacity(self, value):
+        self['capacity'] = value
+
+    @weight.setter
+    def weight(self, value):
+        self['weight'] = value
+
     @flow.setter
     def flow(self, value):
-        assert(self._graph)
-        self._graph.F[self] = value
+        self['flow'] = value

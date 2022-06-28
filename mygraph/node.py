@@ -1,42 +1,17 @@
 
 
+from ast import Assert
 from typing import List, Tuple, FrozenSet, Union
 from .base_types import *
 
-class Node:
-    def __init__(self, key, edges=[]):
+class GraphVertex(GraphObject):
+
+    def __init__(self, key, **extras):
+        super().__init__(extras=extras)
         self._key = key
-        self._edges = set()
-        self._graph = None
-        self.d = dict()
-        self.pi = dict()
-        self.color = dict()
     
-    @property
-    def key(self):
-        self._key
-    
-    @property
-    def graph(self):
-        try:
-            return self._graph
-        except:
-            return None
-    
-    @graph.setter
-    def graph(self, graph):
-        if graph:
-            assert(self._graph is None)
-            self._graph = graph
-            assert(self not in self._graph)
-            self._graph.V.add(self)
-        else:
-            assert(self._graph)
-            for edge in self.edges:
-                edge.detach()
-            self._graph.V.remove(self)
-            self._graph = None
-            del self
+    def _validate_extras(self):
+        pass
     
     def __eq__(self, other):
         # FIXME - add type check
@@ -44,13 +19,21 @@ class Node:
 
     def __hash__(self):
         return hash(self._key)
-    
+
     def __str__(self):
         return str(self._key)
+    
+    def copy(self):
+        return GraphVertex(self._key, self._extras)
  
     @property
+    def graph(self):
+        return self['graph']
+
+    @property
     def edges(self):
-        return self._edges
+        for other in self.graph.E[self]:
+            yield self.graph.E[self][other]
     
     @property
     def children(self):
@@ -64,11 +47,10 @@ class Node:
 
     @property
     def neighbors(self):
-        assert(self.graph)
         for edge in self.edges:
             if self == edge.node_1:
                 yield edge.node_2
             elif self == edge.node_2:
-                if self.graph.undirected: yield edge.node_1
+                if (not self.graph) or self.graph.undirected: yield edge.node_1
             else:
                 raise Exception(f"Node {self} contains an invalid edge: {edge}")

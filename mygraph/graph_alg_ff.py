@@ -1,9 +1,9 @@
 
 from base_types import *
-from .graph import DirectedGraph, Node, Edge
+from .graph import DirectedGraph, GraphVertex, GraphEdge
 from .g_queue import Queue
 
-def BFS(G:Graph, s:Node) -> None:
+def BFS(G:Graph, s:GraphVertex) -> None:
     for v in G.V:
         v.color = WHITE
         v.d[s] = infinity
@@ -25,8 +25,8 @@ def BFS(G:Graph, s:Node) -> None:
 
 def DFS(G:Graph) -> None:
     t:int = 0
-    s:Node = None
-    def DFS_inner(u:Node) -> None:
+    s:GraphVertex = None
+    def DFS_inner(u:GraphVertex) -> None:
         nonlocal t, s
         t += 1
         u.d[s] = t
@@ -61,7 +61,7 @@ def get_augmenting_graph(G:DirectedGraph) -> DirectedGraph:
         edge.flow = 0
     return Gf
 
-def find_path(G: DirectedGraph, s: Node, t: Node) -> List[Node]:
+def find_path(G: DirectedGraph, s: GraphVertex, t: GraphVertex) -> List[GraphVertex]:
     DFS(G, s)
     if t.pi is None: return None
     l = []
@@ -71,17 +71,17 @@ def find_path(G: DirectedGraph, s: Node, t: Node) -> List[Node]:
         v_next = v_next.prev
     return l[::-1]
 
-def find_augmenting_path(G: DirectedGraph, s: Node, t: Node) -> List[Edge]:
+def find_augmenting_path(G: DirectedGraph, s: GraphVertex, t: GraphVertex) -> List[GraphEdge]:
     vertices = find_path(get_augmenting_graph(G), s, t)
-    edges = [Edge(p[i], p[i+1]) for i in range(len(p)-1)]
+    edges = [GraphEdge(p[i], p[i+1]) for i in range(len(p)-1)]
     for edge in edges:
         edge.attach(G)
     return edges
 
-def get_path_capacity(p: List[Edge]) -> int:
+def get_path_capacity(p: List[GraphEdge]) -> int:
     return min([e.capacity for e in p])
 
-def augment_path(G: DirectedGraph, augmenting: List[Edge], capacity):
+def augment_path(G: DirectedGraph, augmenting: List[GraphEdge], capacity):
     for e in G.E:
         e_copy = e.copy()
         new_capacity = e.capacity - capacity
@@ -101,4 +101,4 @@ def augment_path(G: DirectedGraph, augmenting: List[Edge], capacity):
             e_inverse_in_G.capacity += inverse_capacity_addition
             e_inverse_in_G.flow = 0
 
-def ff(G: DirectedGraph, s: Node, t: Node):
+def ff(G: DirectedGraph, s: GraphVertex, t: GraphVertex):
