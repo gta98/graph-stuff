@@ -3,6 +3,7 @@ from typing import Counter, List, Tuple, FrozenSet, Union, Dict
 from itertools import chain
 from collections.abc import Iterable
 from abc import abstractproperty, abstractmethod
+from .utils import *
 
 class GraphObject:
 	NONE = None
@@ -35,6 +36,9 @@ class GraphObject:
 	@abstractproperty
 	def key(self):
 		raise NotImplementedError()
+	@staticmethod
+	def is_valid_key(obj):
+		return is_hashable(obj) and is_stringable(obj)
 
 class GraphObjectMapper:
 	def __init__(self, graph, d: Dict):

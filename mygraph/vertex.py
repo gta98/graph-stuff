@@ -1,30 +1,47 @@
 
 
 from ast import Assert
+from curses import keyname
 from typing import List, Tuple, FrozenSet, Union
+
+from .error_strings import *
 from .base_types import *
+from utils import *
 
 class GraphVertex(GraphObject):
 
     def __init__(self, key, **extras):
         super().__init__(extras=extras)
-        self._key = key
+        self.key = key
     
     def _validate_extras(self):
         pass
     
     def __eq__(self, other):
         # FIXME - add type check
-        return (self._key == other._key)
+        return (self.key == other.key)
 
     def __hash__(self):
-        return hash(self._key)
+        return hash(self.key)
 
     def __str__(self):
-        return str(self._key)
+        return str(self.key)
     
     def copy(self):
         return GraphVertex(self._key, self._extras)
+    
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value):
+        if hasattr(self, "_key"):
+            raise ValueError("GraphVertex key property can only be set on init")
+        if GraphObject.is_valid_key:
+            self._key = value
+        else:
+            raise ValueError(GRAPHVERTEX_KEY_ERROR)
  
     @property
     def graph(self):
